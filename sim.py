@@ -21,10 +21,12 @@ class BacterialCell(Dot):
         self.velocity = np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1), 0]) * 0.15
 
     def jiggle(self, dt):
-        self.shift(self.velocity * dt)
-        offset = self.get_center() - self.dish_center
-        if np.linalg.norm(offset) > CELL_BOUND:
-            self.velocity *= -1
+        ang = np.random.uniform(0, 2 * PI)
+        newpos = self.get_center() + 0.5 * dt * np.array([np.cos(ang), np.sin(ang), 0])
+        while np.linalg.norm(newpos - self.dish_center) > CELL_BOUND:
+            ang = np.random.uniform(0, 2 * PI)
+            newpos = self.get_center() + 0.5 * dt * np.array([np.cos(ang), np.sin(ang), 0])
+        self.move_to(newpos)
 
 class PetriDishScene(Scene):
     def construct(self):
