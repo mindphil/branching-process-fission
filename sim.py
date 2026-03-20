@@ -4,7 +4,7 @@ import numpy as np
 DATA = {
     "Azithromycin":  {"alpha": 9.1,  "beta": 1.12, "color": BLUE},
     "Ciprofloxacin": {"alpha": 71.8, "beta": 2.46, "color": GREEN},
-}
+    }
 
 C_TREAT = 0.18
 START_POP = 100 
@@ -21,10 +21,13 @@ class BacterialCell(Dot):
 
     def jiggle(self, dt):
         ang = np.random.uniform(0, 2 * PI)
-        newpos = self.get_center() + 0.5 * dt * np.array([np.cos(ang), np.sin(ang), 0])
-        while np.linalg.norm(newpos - self.dish_center) > CELL_BOUND:
-            ang = np.random.uniform(0, 2 * PI)
-            newpos = self.get_center() + 0.5 * dt * np.array([np.cos(ang), np.sin(ang), 0])
+        step = 0.5 * dt * np.array([np.cos(ang), np.sin(ang), 0])
+        newpos = self.get_center() + step
+        dist = np.linalg.norm(newpos - self.dish_center)
+        if dist > CELL_BOUND:
+            direction = (newpos - self.dish_center) / dist
+            newpos = self.dish_center + direction * CELL_BOUND
+            
         self.move_to(newpos)
 
 class PetriDishScene(Scene):
@@ -58,8 +61,8 @@ class PetriDishScene(Scene):
 
         self.add(dish_l, dish_r, lbl_l, lbl_r, gen_num, pop_l_count, pop_r_count)
         
-        azi_cells = VGroup(*[BacterialCell(dish_l_pos + np.random.uniform(-1.5, 1.5, 3), dish_l_pos, color=BLUE) for _ in range(START_POP)])
-        cip_cells = VGroup(*[BacterialCell(dish_r_pos + np.random.uniform(-1.5, 1.5, 3), dish_r_pos, color=GREEN) for _ in range(START_POP)])
+        azi_cells = VGroup(*[BacterialCell(dish_l_pos + np.array([np.random.uniform(-1.5, 1.5), np.random.uniform(-1.5, 1.5), 0]), dish_l_pos, color=BLUE) for _ in range(START_POP)])
+        cip_cells = VGroup(*[BacterialCell(dish_r_pos + np.array([np.random.uniform(-1.5, 1.5), np.random.uniform(-1.5, 1.5), 0]), dish_r_pos, color=GREEN) for _ in range(START_POP)])
         
         for c in [*azi_cells, *cip_cells]: 
             c.add_updater(lambda m, dt: m.jiggle(dt))
@@ -124,8 +127,8 @@ class PetriDishScene(Scene):
                 )
             else: 
                 self.play(
-                    pop_l_tracker.set_value(new_pop_a),
-                    pop_r_tracker.set_value(new_pop_c),
+                    pop_l_tracker.animate.set_value(new_pop_a),
+                    pop_r_tracker.animate.set_value(new_pop_c),
                     run_time=0.1
                 )
 
