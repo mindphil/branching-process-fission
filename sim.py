@@ -15,7 +15,7 @@ def get_p_divide(c, alpha, beta):
     return 1.0 / (1.0 + alpha * (c ** beta))
 
 class BacterialCell(Dot):
-    def __init__(self, pos, dish_center, color=WHITE, **kwargs):
+    def __init__(self, pos, dish_center, color=WHITE):
         super().__init__(point=pos, radius=0.06, color=color, fill_opacity=0.8, stroke_width=2, stroke_color=color)
         self.dish_center = np.array(dish_center)
 
@@ -124,8 +124,8 @@ class PetriDishScene(Scene):
                 )
             else: 
                 self.play(
-                    pop_l_count.animate.set_value(new_pop_a),
-                    pop_r_count.animate.set_value(new_pop_c),
+                    pop_l_tracker.set_value(new_pop_a),
+                    pop_r_tracker.set_value(new_pop_c),
                     run_time=0.1
                 )
 
