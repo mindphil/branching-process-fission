@@ -18,16 +18,25 @@ class BacterialCell(Dot):
     def __init__(self, pos, dish_center, color=WHITE):
         super().__init__(point=pos, radius=0.06, color=color, fill_opacity=0.8, stroke_width=2, stroke_color=color)
         self.dish_center = np.array(dish_center)
-
-    def jiggle(self, dt):
         ang = np.random.uniform(0, 2 * PI)
-        step = 0.5 * dt * np.array([np.cos(ang), np.sin(ang), 0])
-        newpos = self.get_center() + step
-        dist = np.linalg.norm(newpos - self.dish_center)
+        speed = np.random.uniform(0.05, 0.21)
+        self.velocity = speed * np.array([np.cos(ang), np.sin(ang), 0])
+
+    def drift(self, dt):
+        ang_nudge = np.random.uniform(-0.2, 0.2)
+        cos_a, sin_a = np.cos(ang_nudge), np.sin(ang_nudge)
+        vx, vy = self.velocity[0], self.velocity[1]
+        self.velocity[0] = vx * cos_a - vy * sin_a
+        self.velocity[1] = vx * sin_a + vy * cos_a
+
+        newpos = self.get_center() + self.velocity * dt
+        offset = newpos - self.dish_center
+        dist = np.linalg.norm(offset)
+
         if dist > CELL_BOUND:
-            direction = (newpos - self.dish_center) / dist
-            newpos = self.dish_center + direction * CELL_BOUND
-            
+            normal = offset / dist
+            self.velocity -= 2 * np.dot(self.velocity, normal) * normal
+            newpos = self.dish_center + normal * CELL_BOUND
         self.move_to(newpos)
 
 class PetriDishScene(Scene):
@@ -65,7 +74,7 @@ class PetriDishScene(Scene):
         cip_cells = VGroup(*[BacterialCell(dish_r_pos + np.array([np.random.uniform(-1.5, 1.5), np.random.uniform(-1.5, 1.5), 0]), dish_r_pos, color=GREEN) for _ in range(START_POP)])
         
         for c in [*azi_cells, *cip_cells]: 
-            c.add_updater(lambda m, dt: m.jiggle(dt))
+            c.add_updater(lambda m, dt: m.drift(dt))
         
         self.play(FadeIn(azi_cells), FadeIn(cip_cells))
         self.wait(1)
@@ -149,5 +158,9 @@ class PetriDishScene(Scene):
         survives = rng.random(n) < p
         parents = [c for c, s in zip(group, survives) if s]
         to_remove = [c for c, s in zip(group, survives) if not s]
-        kids = [BacterialCell(c.get_center(), center, color=color) for c in parents]
+        kids = []
+        for c in parents:
+            k = BacterialCell(c.get_center(), center, color=color)
+            k.add_updater(lambda m, dt: m.drift(dt))
+            kids.append(k)
         return to_remove, parents, kids
