@@ -143,16 +143,11 @@ class PetriDishScene(Scene):
         self.wait(2)
 
     def get_next_gen(self, group, p, center, color, rng):
-        to_remove = []
-        parents = []
-        kids = []
-        for cell in group:
-            if rng.random() < p:
-                parents.append(cell)
-                nc = BacterialCell(cell.get_center(), center, color=color)
-                nc.add_updater(lambda m, dt: m.jiggle(dt))
-                kids.append(nc)
-            else:
-                to_remove.append(cell)
-                
+        if len(group) == 0:
+            return [], [], []
+        n = len(group.submobjects)
+        survives = rng.random(n) < p
+        parents = [c for c, s in zip(group, survives) if s]
+        to_remove = [c for c, s in zip(group, survives) if not s]
+        kids = [BacterialCell(c.get_center(), center, color=color) for c in parents]
         return to_remove, parents, kids
