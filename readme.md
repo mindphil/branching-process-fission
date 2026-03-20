@@ -8,5 +8,5 @@ Requirements:
 - Manim CE (install with pip for best results)
 - numpy
 
-Demo:
+
 https://github.com/user-attachments/assets/401ae3f5-ee9d-4ff8-8ca3-79a736cc3aff
