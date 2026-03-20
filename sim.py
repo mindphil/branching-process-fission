@@ -16,7 +16,7 @@ def get_p_divide(c, alpha, beta):
 
 class BacterialCell(Dot):
     def __init__(self, pos, dish_center, color=WHITE, **kwargs):
-        super().__init__(point=pos, radius=0.06, color=color, **kwargs)
+        super().__init__(point=pos, radius=0.06, color=color, fill_opacity=0.8, stroke_width=2, stroke_color=color)
         self.dish_center = np.array(dish_center)
 
     def jiggle(self, dt):
