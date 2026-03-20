@@ -38,25 +38,22 @@ class PetriDishScene(Scene):
         lbl_r = Text("Ciprofloxacin", color=GREEN, font_size=24).next_to(dish_r, UP)
         
         gen_tracker = ValueTracker(0)
-        gen_num = VGroup(
-            Text("Generation:", font_size=20),
-            Integer(0, font_size=25).add_updater(lambda m: m.set_value(gen_tracker.get_value()))
-        ).arrange(RIGHT, buff=0.2).to_edge(DOWN, buff=1)
-        gen_num.tracker = gen_tracker 
+        gen_num = always_redraw(
+        lambda: Text(f"Generation: {int(gen_tracker.get_value())}", font_size=20)
+            .to_edge(DOWN, buff=1)
+        )
 
         pop_l_tracker = ValueTracker(START_POP)
-        pop_l_count = VGroup(
-            Text("Pop:", font_size=18),
-            Integer(START_POP, font_size=23).add_updater(lambda m: m.set_value(pop_l_tracker.get_value()))
-        ).arrange(RIGHT, buff=0.15).next_to(dish_l, DOWN)
-        pop_l_count.tracker = pop_l_tracker
+        pop_l_count = always_redraw(
+        lambda: Text(f"Pop: {int(pop_l_tracker.get_value())}", font_size=18)
+            .next_to(dish_l, DOWN)
+        )
 
         pop_r_tracker = ValueTracker(START_POP)
-        pop_r_count = VGroup(
-            Text("Pop:", font_size=18),
-            Integer(START_POP, font_size=23).add_updater(lambda m: m.set_value(pop_r_tracker.get_value()))
-        ).arrange(RIGHT, buff=0.15).next_to(dish_r, DOWN)
-        pop_r_count.tracker = pop_r_tracker
+        pop_r_count = always_redraw(
+        lambda: Text(f"Pop: {int(pop_r_tracker.get_value())}", font_size=18)
+            .next_to(dish_r, DOWN)
+        )
 
         self.add(dish_l, dish_r, lbl_l, lbl_r, gen_num, pop_l_count, pop_r_count)
         
@@ -86,7 +83,7 @@ class PetriDishScene(Scene):
         p_cip = get_p_divide(C_TREAT, DATA["Ciprofloxacin"]["alpha"], DATA["Ciprofloxacin"]["beta"])
 
         for g in range(1, 41):
-            gen_num.tracker.set_value(g)
+            gen_tracker.set_value(g)
             
             rem_a, par_a, kid_a = self.get_next_gen(azi_cells, p_azi, dish_l_pos, BLUE, rng)
             rem_c, par_c, kid_c = self.get_next_gen(cip_cells, p_cip, dish_r_pos, GREEN, rng)
@@ -120,14 +117,14 @@ class PetriDishScene(Scene):
             if death_anims:
                 self.play(
                     *death_anims,
-                    pop_l_count.tracker.animate.set_value(new_pop_a),
-                    pop_r_count.tracker.animate.set_value(new_pop_c),
+                    pop_l_tracker.animate.set_value(new_pop_a),
+                    pop_r_tracker.animate.set_value(new_pop_c),
                     run_time=0.4
                 )
             else: 
                 self.play(
-                    pop_l_count.tracker.animate.set_value(new_pop_a),
-                    pop_r_count.tracker.animate.set_value(new_pop_c),
+                    pop_l_count.animate.set_value(new_pop_a),
+                    pop_r_count.animate.set_value(new_pop_c),
                     run_time=0.1
                 )
 
