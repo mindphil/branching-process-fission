@@ -18,7 +18,6 @@ class BacterialCell(Dot):
     def __init__(self, pos, dish_center, color=WHITE, **kwargs):
         super().__init__(point=pos, radius=0.06, color=color, **kwargs)
         self.dish_center = np.array(dish_center)
-        self.velocity = np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1), 0]) * 0.15
 
     def jiggle(self, dt):
         ang = np.random.uniform(0, 2 * PI)
